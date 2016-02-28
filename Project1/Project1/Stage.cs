@@ -396,6 +396,11 @@ public class Stage : Game {
       m3d.addObject(new Vector3(340 * spacing, terrain.surfaceHeight(340, 340), 340 * spacing),
          new Vector3(0, 1, 0), 0.79f); // , new Vector3(1, 4, 1));
       Components.Add(m3d);
+      Model3D treasure = new Model3D(this, "treasure", "treasure2");
+      treasure.IsCollidable = true;  // must be set before addObject(...) and Model3D doesn't set it
+      treasure.addObject(new Vector3(67050,100,67950),
+         new Vector3(0, 1, 0), 0.0f, new Vector3(10,10,10)); // , new Vector3(1, 4, 1));
+      Components.Add(treasure);
 		// create 20 clouds
 		Cloud cloud = new Cloud(this, "cloud", "cloudV3", 20);
 		Components.Add(cloud);
