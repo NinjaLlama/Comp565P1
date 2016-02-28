@@ -44,6 +44,9 @@ namespace Project1 {
 /// 1/20/2016 last changed
 /// </summary>
 public class NPAgent : Agent {
+    public enum UpdateState { PATH_FOLLOWING, TREASURE_GOAL};
+    public UpdateState currentState = UpdateState.PATH_FOLLOWING;
+    private KeyboardState oldKeyboardState; 
    private NavNode nextGoal;
    private Path path;
    private int snapDistance = 20;  // this should be a function of step and stepSize
@@ -89,21 +92,52 @@ public class NPAgent : Agent {
    /// continue making steps towards the nextGoal.
    /// </summary>
    public override void Update(GameTime gameTime) {
-		agentObject.turnToFace(nextGoal.Translation);  // adjust to face nextGoal every move
-		// See if at or close to nextGoal, distance measured in 2D xz plane
-		float distance = Vector3.Distance(
-			new Vector3(nextGoal.Translation.X, 0, nextGoal.Translation.Z),
-			new Vector3(agentObject.Translation.X, 0, agentObject.Translation.Z));
-		stage.setInfo(15, stage.agentLocation(this));
-      stage.setInfo(16,
-			string.Format("          nextGoal ({0:f0}, {1:f0}, {2:f0})  distance to next goal = {3,5:f2})", 
-				nextGoal.Translation.X/stage.Spacing, nextGoal.Translation.Y, nextGoal.Translation.Z/stage.Spacing, distance) );
-      if (distance  <= snapDistance)  {  
-         // snap to nextGoal and orient toward the new nextGoal 
-         nextGoal = path.NextNode;
-         // agentObject.turnToFace(nextGoal.Translation);
-         }
-      base.Update(gameTime);  // Agent's Update();
+       KeyboardState keyboardState = Keyboard.GetState();
+       if ((keyboardState.IsKeyDown(Keys.N) && !oldKeyboardState.IsKeyDown(Keys.N)) && currentState == UpdateState.PATH_FOLLOWING)
+          currentState = UpdateState.TREASURE_GOAL;  // toggle NPAgent update state.
+       float distance;
+       switch(currentState)
+       { 
+           case UpdateState.PATH_FOLLOWING :
+               agentObject.turnToFace(nextGoal.Translation);  // adjust to face nextGoal every move
+		        // See if at or close to nextGoal, distance measured in 2D xz plane
+		        distance = Vector3.Distance(
+			        new Vector3(nextGoal.Translation.X, 0, nextGoal.Translation.Z),
+			        new Vector3(agentObject.Translation.X, 0, agentObject.Translation.Z));
+		        stage.setInfo(15, stage.agentLocation(this));
+              stage.setInfo(16,
+			        string.Format("          nextGoal ({0:f0}, {1:f0}, {2:f0})  distance to next goal = {3,5:f2})", 
+				        nextGoal.Translation.X/stage.Spacing, nextGoal.Translation.Y, nextGoal.Translation.Z/stage.Spacing, distance) );
+              if (distance  <= snapDistance)  {  
+                 // snap to nextGoal and orient toward the new nextGoal 
+                 nextGoal = path.NextNode;
+                 // agentObject.turnToFace(nextGoal.Translation);
+                 }
+               oldKeyboardState = keyboardState;    // Update saved state.
+              base.Update(gameTime);  // Agent's Update();
+               break;
+
+           case UpdateState.TREASURE_GOAL :
+               agentObject.turnToFace(new Vector3(67050,100,67950));  // adjust to face nextGoal every move
+		        // See if at or close to nextGoal, distance measured in 2D xz plane
+		        distance = Vector3.Distance(
+			        new Vector3(67050,0,67950),
+			        new Vector3(agentObject.Translation.X, 0, agentObject.Translation.Z));
+                stage.setInfo(15, stage.agentLocation(this));
+              //stage.setInfo(16,
+              //      string.Format("          nextGoal ({0:f0}, {1:f0}, {2:f0})  distance to next goal = {3,5:f2})", 
+              //          nextGoal.Translation.X/stage.Spacing, nextGoal.Translation.Y, nextGoal.Translation.Z/stage.Spacing, distance) );
+              if (distance  <= 300)  {  
+                 // snap to nextGoal and orient toward the new nextGoal 
+                 //nextGoal = path.NextNode;
+                 currentState = UpdateState.PATH_FOLLOWING;
+                 // agentObject.turnToFace(nextGoal.Translation);
+                 }
+               oldKeyboardState = keyboardState;    // Update saved state.
+              base.Update(gameTime);  // Agent's Update();
+               break;
+       }
+
       }
    } 
 }
