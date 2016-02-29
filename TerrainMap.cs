@@ -202,10 +202,10 @@ public class TerrainMap : Game {
        int[,] centers = new int[nCenter, 2];
        centers[0, 0] = 70;
        centers[0, 1] = 70;
-       centers[1, 0] = 450;
-       centers[1, 1] = 470;
-       centers[2, 0] = 150;
-       centers[2, 1] = 200;
+       centers[1, 0] = 250;
+       centers[1, 1] = 270;
+       centers[2, 0] = 50;
+       centers[2, 1] = 90;
       
        heightMap = new Color[textureWidth, textureHeight];
        
@@ -229,50 +229,45 @@ public class TerrainMap : Game {
 
 
 
+       //Brownian motion 
+       for (int p = 0; p <2; p++)
+       {
+           //increment heights for p*c*steps heightMap positions
 
-
-       //increment heights for p*c*steps heightMap positions
-
-            re = random.Next(nCenter);
+           re = random.Next(nCenter);
            xposition = centers[re, 0];
            zposition = centers[re, 1];
 
-           for(int i=0;i<10000;i++)
+           for (int i = 0; i < 10000; i++)
            {
 
                for (int x = xposition - radius; x <= xposition + radius; x++)
-                   for (int z = zposition - radius; z <= zposition + radius;z++ )
-                      if(x>=20 && x <textureWidth-20 &&    z>=20 &&  z< textureHeight-20)
-                            Hmap[x, z]+=1;//add 1 to all heightMap[x,z]
-              
+                   for (int z = zposition - radius; z <= zposition + radius; z++)
+                       if (x >= 20 && x < textureWidth - 20 && z >= 20 && z < textureHeight - 20)
+                           Hmap[x, z] += 1;//add 1 to all heightMap[x,z]
+
 
                //take steps on a random walk
 
-               int first = random.Next(2);
-               int second = random.Next(2);
+               xposition += step * random.Next(-1, 2);
+               zposition += step * random.Next(-1, 2);
 
-               if (first == 0)
-                   xposition += step;
-               else
-                   xposition -= step;
-               if (second == 0)
-                   zposition += step;
-               else
-                   zposition-= step;
+
+
 
 
 
                //if x or z are outside height map dimensions reset x and z randomnly to selected center [c]
-               if(xposition<0 || xposition>textureWidth||zposition<0||zposition>=textureHeight)
+               if (xposition < 0 || xposition > textureWidth || zposition < 0 || zposition >= textureHeight)
                {
                    int r = random.Next(nCenter);
-                   xposition=centers[r,0];
+                   xposition = centers[r, 0];
                    zposition = centers[r, 1];
 
                }
-              
+
            }
-       
+       }
 
 
        
