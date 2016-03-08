@@ -48,9 +48,12 @@ public class Player : Agent {
    private int rotate;
    private float angle;
    private Matrix initialOrientation;
+   private List<Treasure> treasure;
+   private List<Treasure> marked;
+   public int treasureCount;
 
    public Player(Stage theStage, string label, Vector3 pos, Vector3 orientAxis, 
-   float radians, string meshFile)
+   float radians, string meshFile, List<Treasure> t, List<Treasure> m)
    : base(theStage, label, pos, orientAxis, radians, meshFile)
       {  // change names for on-screen display of current camera
       first.Name =  "First";
@@ -61,6 +64,9 @@ public class Player : Agent {
       rotate = 0;
       angle = 0.01f;
       initialOrientation = agentObject.Orientation;
+      treasure = t;
+      marked = m;
+      treasureCount = 0;
       }
 
    /// <summary>
@@ -72,6 +78,21 @@ public class Player : Agent {
    /// </summary>
    /// <param name="gameTime"></param>
    public override void Update(GameTime gameTime) {
+       int target = findTreasure(agentObject, treasure);
+       float distance = Vector3.Distance(
+                    treasure[target].translation,
+                    new Vector3(agentObject.Translation.X, 0, agentObject.Translation.Z));
+       if (distance <= 300 && treasure[target].Visible == true)
+       {
+           // snap to nextGoal and orient toward the new nextGoal 
+           //nextGoal = path.NextNode;
+           treasure[target].tagged = true;
+           treasure[target].Visible = false;
+           marked[target].Visible = true;
+           treasureCount++;
+           // agentObject.turnToFace(nextGoal.Translation);
+       }
+
       KeyboardState keyboardState = Keyboard.GetState();
       if (keyboardState.IsKeyDown(Keys.R) && !oldKeyboardState.IsKeyDown(Keys.R)) 
          agentObject.Orientation = initialOrientation; 
@@ -85,5 +106,26 @@ public class Player : Agent {
       base.Update(gameTime);
       rotate = agentObject.Step = 0;
       }
+
+   private int findTreasure(Object3D agentObject, List<Treasure> treasure)
+   {
+       float minDistance = 100000000;
+       int targetTreasure = 0;
+       for (int i = 0; i < treasure.Count; i++)
+       {
+           if (!treasure[i].tagged) //don't check distance for tagged treasures
+           {
+               float distance = Vector3.Distance(
+                        treasure[i].translation,
+                        new Vector3(agentObject.Translation.X, 0, agentObject.Translation.Z));
+               if (distance < minDistance)
+               {
+                   minDistance = distance;
+                   targetTreasure = i;
+               }
+           }
+       }
+       return targetTreasure;
+   }
    }
 }
