@@ -102,6 +102,8 @@ public class Stage : Game {
    // Required entities -- all AGXNASK programs have a Player and Terrain
    protected Player player = null;
    protected NPAgent npAgent = null;
+   protected List<Treasure> treasure = new List<Treasure>();
+   protected List<Treasure> marked = new List<Treasure>();
    protected Terrain terrain = null;
    protected List<Object3D> collidable = null;
    // Screen display and other information variables
@@ -367,14 +369,29 @@ public class Stage : Game {
 		terrain = new Terrain(this, "terrain", "heightTexture", "colorTexture");
       Components.Add(terrain);
       // Load Agent mesh objects, meshes do not have textures
+      treasure.Add(new Treasure(this, "treasure", "crate", new Vector3(67050, 150, 67950), new Vector3(0, 1, 0), 0.0f));
+      treasure.Add(new Treasure(this, "treasure", "crate", new Vector3(67950, 150, 60950), new Vector3(0, 1, 0), 0.0f));
+      treasure.Add(new Treasure(this, "treasure", "crate", new Vector3(67950, 150, 70950), new Vector3(0, 1, 0), 0.0f));
+      treasure.Add(new Treasure(this, "treasure", "crate", new Vector3(60050, 150, 72950), new Vector3(0, 1, 0), 0.0f));
+      for (int i = 0; i < treasure.Count; i++)
+          Components.Add(treasure[i]);
+      marked.Add(new Treasure(this, "treasure", "crateOpen", new Vector3(67050, 150, 67950), new Vector3(0, 1, 0), 0.0f));
+      marked.Add(new Treasure(this, "treasure", "crateOpen", new Vector3(67950, 150, 60950), new Vector3(0, 1, 0), 0.0f));
+      marked.Add(new Treasure(this, "treasure", "crateOpen", new Vector3(67950, 150, 70950), new Vector3(0, 1, 0), 0.0f));
+      marked.Add(new Treasure(this, "treasure", "crateOpen", new Vector3(60050, 150, 72950), new Vector3(0, 1, 0), 0.0f));
+      for (int i = 0; i < marked.Count; i++)
+      {
+          Components.Add(marked[i]);
+          marked[i].Visible = false;
+      }
       player = new Player(this, "Chaser",
          new Vector3(510 * spacing, terrain.surfaceHeight(510, 507), 507 * spacing),
-         new Vector3(0, 1, 0), 0.78f, "redAvatarV6");  // face looking diagonally across stage
+         new Vector3(0, 1, 0), 0.78f, "redAvatarV6", treasure, marked);  // face looking diagonally across stage
       player.IsCollidable = true; // test collisions for player
       Components.Add(player);
       npAgent = new NPAgent(this, "Evader",
          new Vector3(490 * spacing, terrain.surfaceHeight(490, 450), 450 * spacing),
-         new Vector3(0, 1, 0), 0.0f, "magentaAvatarV6");  // facing +Z
+         new Vector3(0, 1, 0), 0.0f, "magentaAvatarV6", treasure, marked);  // facing +Z
 		npAgent.IsCollidable = false;  // npAgent does not test for collisions
       Components.Add(npAgent);
 		// create file output stream for trace()
@@ -396,11 +413,13 @@ public class Stage : Game {
       m3d.addObject(new Vector3(340 * spacing, terrain.surfaceHeight(340, 340), 340 * spacing),
          new Vector3(0, 1, 0), 0.79f); // , new Vector3(1, 4, 1));
       Components.Add(m3d);
-      Model3D treasure = new Model3D(this, "treasure", "treasure2");
-      treasure.IsCollidable = true;  // must be set before addObject(...) and Model3D doesn't set it
-      treasure.addObject(new Vector3(67050,100,67950),
-         new Vector3(0, 1, 0), 0.0f, new Vector3(10,10,10)); // , new Vector3(1, 4, 1));
-      Components.Add(treasure);
+      //Model3D treasure = new Model3D(this, "treasure", "treasure");
+      //treasure.IsCollidable = true;  // must be set before addObject(...) and Model3D doesn't set it
+      //treasure.addObject(new Vector3(67050,150,67950),
+      //   new Vector3(0, 1, 0), 0.0f, new Vector3(3,3,3)); // , new Vector3(1, 4, 1));
+      //Components.Add(treasure);
+      //treasure = new Treasure(this, "treasure", "treasure", new Vector3(67050, 150, 67950), new Vector3(0, 1, 0), 0.0f);
+      //Components.Add(treasure);
 		// create 20 clouds
 		Cloud cloud = new Cloud(this, "cloud", "cloudV3", 20);
 		Components.Add(cloud);
@@ -437,8 +456,8 @@ public class Stage : Game {
                currentCamera.Name, time.Hours, time.Minutes, time.Seconds, updates.ToString(), draws.ToString()));
          draws = updates = 0;
          fpsSecond = 0.0;
-			inspector.setInfo(11, agentLocation(player));
-			inspector.setInfo(12, agentLocation(npAgent));
+			inspector.setInfo(11, agentLocation(player) + String.Format(" Treasure: {0}", player.treasureCount));
+            inspector.setInfo(12, agentLocation(npAgent) + String.Format(" Treasure: {0}", npAgent.treasureCount));
             // inspector lines 13 and 14 can be used to describe player and npAgent's status
             inspector.setMatrices("player", "npAgent", player.AgentObject.Orientation, npAgent.AgentObject.Orientation);
 
